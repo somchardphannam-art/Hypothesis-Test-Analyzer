@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hypothesis Test Analyzer V1.7</title>
+<title>Hypothesis Test Analyzer V1.8</title>
 <style>
 
 :root{--page-bg:#f4f7fb;--panel-bg:#fff;--text:#183153;--muted:#66788a;--border:#d9e2ec;--title-bg:#f7faff;--table-head:#edf4fc}
@@ -170,6 +170,68 @@ body.theme-dark .selection-info,body.theme-digital .selection-info{color:#bff7ff
   width:100%;
   margin-top:0 !important;
 }
+
+/* =========================
+   V1.8 Main Page Layout
+   Result → Test Setup → Data
+   ========================= */
+.v18-layout{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  width:100%;
+}
+.v18-layout > .result-first,
+.v18-layout > .setup-second{
+  width:100%;
+}
+.v18-layout > .result-first > .panel,
+.v18-layout > .setup-second > .panel{
+  width:100%;
+  box-sizing:border-box;
+}
+.v18-layout > .result-first{
+  order:1;
+}
+.v18-layout > .setup-second{
+  order:2;
+}
+.v18-layout > .panel{
+  order:3;
+}
+
+/* Result is the primary view */
+.v18-layout > .result-first .title{
+  font-size:16px;
+}
+.v18-layout > .result-first .result{
+  width:100%;
+}
+
+/* Test Setup is a full-width control panel */
+.v18-layout > .setup-second .fields{
+  grid-template-columns:repeat(3,1fr);
+}
+.v18-layout > .setup-second .run{
+  margin-top:12px;
+}
+
+/* Data Worksheet remains the detailed input area */
+.v18-layout > .panel:last-child{
+  order:3;
+}
+
+/* On smaller screens, Test Setup fields stack naturally */
+@media(max-width:900px){
+  .v18-layout > .setup-second .fields{
+    grid-template-columns:1fr 1fr;
+  }
+}
+@media(max-width:600px){
+  .v18-layout > .setup-second .fields{
+    grid-template-columns:1fr;
+  }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -181,22 +243,11 @@ body.theme-dark .selection-info,body.theme-digital .selection-info{color:#bff7ff
 <div class="theme-bar">🎨 Theme <select id="themeSelect" onchange="setTheme(this.value)"><option value="blue">Blue</option><option value="light">Light</option><option value="dark">Dark</option><option value="minimal">Minimal</option><option value="pastel">Pastel</option><option value="digital">Digital</option></select></div>
 <main>
 
-<!-- Test Setup + Result at the top -->
-<div class="setup-result">
-<section class="panel">
-  <div class="title">⚙️ Test Setup <small>Select the test and data columns</small></div>
-  <div class="fields">
-    <div class="field"><label>Test Type</label><select id="type" onchange="setup()"><option value="one">One-Sample t-Test</option><option value="two" selected>Two-Sample t-Test (Welch)</option><option value="paired">Paired t-Test</option></select></div>
-    <div class="field"><label>Significance Level (α)</label><select id="alpha"><option>.10</option><option selected>.05</option><option>.01</option></select></div>
-    <div class="field" id="muField"><label>Hypothesized Mean (μ₀)</label><input id="mu" type="number" step="any" value="15"></div>
-    <div class="field"><label>Alternative Hypothesis</label><select id="tail"><option value="two" selected>≠ (two-sided)</option><option value="greater">&gt; (greater)</option><option value="less">&lt; (less)</option></select></div>
-    <div class="field"><label>Sample / Column A</label><select id="a"></select></div>
-    <div class="field" id="bField"><label>Sample / Column B</label><select id="b"></select></div>
-  </div>
-  <div class="run"><button class="primary" onclick="run()">▶ Run Test</button></div>
-</section>
+<!-- V1.8 Layout: Result first, Test Setup second, Data Worksheet last -->
+<div class="v18-layout">
 
-<section class="panel">
+  <section class="result-first">
+    <section class="panel">
   <div class="title">📊 Result <small>Statistical result and comparison graph</small></div>
   <div class="result">
     <div class="metrics">
@@ -233,9 +284,24 @@ body.theme-dark .selection-info,body.theme-digital .selection-info{color:#bff7ff
 
 </div>
 </section>
-</div>
+  </section>
 
-<!-- Data Worksheet at the bottom -->
+  <section class="setup-second">
+    <section class="panel">
+  <div class="title">⚙️ Test Setup <small>Select the test and data columns</small></div>
+  <div class="fields">
+    <div class="field"><label>Test Type</label><select id="type" onchange="setup()"><option value="one">One-Sample t-Test</option><option value="two" selected>Two-Sample t-Test (Welch)</option><option value="paired">Paired t-Test</option></select></div>
+    <div class="field"><label>Significance Level (α)</label><select id="alpha"><option>.10</option><option selected>.05</option><option>.01</option></select></div>
+    <div class="field" id="muField"><label>Hypothesized Mean (μ₀)</label><input id="mu" type="number" step="any" value="15"></div>
+    <div class="field"><label>Alternative Hypothesis</label><select id="tail"><option value="two" selected>≠ (two-sided)</option><option value="greater">&gt; (greater)</option><option value="less">&lt; (less)</option></select></div>
+    <div class="field"><label>Sample / Column A</label><select id="a"></select></div>
+    <div class="field" id="bField"><label>Sample / Column B</label><select id="b"></select></div>
+  </div>
+  <div class="run"><button class="primary" onclick="run()">▶ Run Test</button></div>
+</section>
+  </section>
+
+  <!-- Data Worksheet at the bottom -->
 <section class="panel">
   <div class="title"><span>📋 Data Worksheet</span><small>100 Rows × 10 Columns • Excel-style Copy/Paste • Enter / Arrow navigation</small></div>
   <div class="toolbar">
@@ -247,8 +313,10 @@ body.theme-dark .selection-info,body.theme-digital .selection-info{color:#bff7ff
   <div class="status"><span id="status"></span> <span id="selectionInfo" class="selection-info"></span></div>
 </section>
 
+</div>
+
 </main>
-<footer>Hypothesis Test Analyzer • V1.7 Prototype</footer>
+<footer>Hypothesis Test Analyzer • V1.8 Prototype</footer>
 
 <script>
 const THEMES=['blue','light','dark','minimal','pastel','digital'];
