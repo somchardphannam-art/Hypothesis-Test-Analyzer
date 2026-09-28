@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hypothesis Test Analyzer V1.7</title>
+<style>
+
+:root{--page-bg:#f4f7fb;--panel-bg:#fff;--text:#183153;--muted:#66788a;--border:#d9e2ec;--title-bg:#f7faff;--table-head:#edf4fc}
+body{background:var(--page-bg);color:var(--text)}
+header{background:linear-gradient(135deg,var(--header1,#0d477f),var(--header2,#176dbf))}
+.panel,.graph-card,.chart-wrap{background:var(--panel-bg);border-color:var(--border)}
+.title,.minitab-head{background:var(--title-bg);border-color:var(--border)}
+.field input,.field select,.graph-control input[type=text]{background:var(--panel-bg);border-color:var(--border);color:var(--text)}
+.theme-bar{max-width:1500px;margin:12px auto 0;padding:0 18px;display:flex;justify-content:flex-end;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+.theme-bar select{padding:7px 10px;border:1px solid var(--border);border-radius:7px;background:var(--panel-bg);color:var(--text)}
+body.theme-blue{--page-bg:#f4f7fb;--panel-bg:#fff;--text:#183153;--muted:#66788a;--border:#d9e2ec;--title-bg:#f7faff;--table-head:#edf4fc;--header1:#0d477f;--header2:#176dbf}
+body.theme-light{--page-bg:#fff;--panel-bg:#fff;--text:#222;--muted:#666;--border:#ddd;--title-bg:#fafafa;--table-head:#f0f0f0;--header1:#555;--header2:#888}
+body.theme-dark{--page-bg:#111820;--panel-bg:#18232d;--text:#eef5fb;--muted:#aab9c7;--border:#344756;--title-bg:#20303d;--table-head:#263947;--header1:#07131f;--header2:#123b5c}
+body.theme-minimal{--page-bg:#fafafa;--panel-bg:#fff;--text:#222;--muted:#666;--border:#ddd;--title-bg:#f5f5f5;--table-head:#eee;--header1:#444;--header2:#777}
+body.theme-pastel{--page-bg:#fff6fb;--panel-bg:#fffaff;--text:#5d4764;--muted:#866f8d;--border:#ead7e7;--title-bg:#fff0fa;--table-head:#f9e5f5;--header1:#8b6689;--header2:#b58aa8}
+body.theme-digital{--page-bg:#071318;--panel-bg:#0c2028;--text:#bdf7ff;--muted:#8bc4cc;--border:#16434d;--title-bg:#0e2b34;--table-head:#123b45;--header1:#00151c;--header2:#003640}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#183153}
+header{background:linear-gradient(135deg,#0d477f,#176dbf);color:white;padding:22px 28px;display:flex;justify-content:space-between;gap:15px;align-items:center}
+h1{margin:0;font-size:28px}.sub{opacity:.85;margin-top:5px;font-size:14px}
+button,select,input{font:inherit}button{border:1px solid #d5dfeb;background:#fff;border-radius:7px;padding:8px 12px;cursor:pointer;color:#183153}button:hover:not(:disabled){background:#eef5fc}button:disabled{opacity:.45}.primary{background:#1669c9;color:#fff;border-color:#1669c9}
+main{max-width:1500px;margin:18px auto;padding:0 18px}.panel{background:white;border:1px solid #d9e2ec;border-radius:10px;margin-bottom:16px;box-shadow:0 3px 14px #14325a12;overflow:hidden}
+.title{padding:12px 16px;background:#f7faff;border-bottom:1px solid #d9e2ec;font-weight:bold;font-size:17px;display:flex;justify-content:space-between;align-items:center;gap:12px}.title small{font-size:12px;color:#66788a;font-weight:normal}
+.setup-result{display:grid;grid-template-columns:1fr;gap:16px}.fields{padding:15px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:12px;font-weight:bold;color:#66788a;margin-bottom:5px}.field input,.field select{width:100%;padding:9px;border:1px solid #d9e2ec;border-radius:6px;background:white}.run{padding:0 15px 15px;text-align:right}
+.result{padding:15px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric{border:1px solid #d9e2ec;border-radius:8px;padding:12px;background:#fbfdff}.metric small{color:#66788a;font-weight:bold}.metric strong{display:block;font-size:21px;margin-top:5px}.decision{margin-top:14px;padding:13px;background:#eef5ff;border-left:4px solid #1669c9;border-radius:7px}.detail{margin-top:12px;color:#66788a;font-size:12px;line-height:1.7}
+.result-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.secondary{background:#f7faff;color:#214a76}.copy-ok{background:#e9f8ef!important;border-color:#65b985!important;color:#21663c!important}
+.minitab-wrap{margin-top:15px;border:1px solid #d9e2ec;border-radius:8px;overflow:auto}.minitab-head{padding:10px 12px;background:#f7faff;font-weight:bold;color:#214a76}.minitab-table{width:100%;border-collapse:collapse;font-size:12px;min-width:620px}.minitab-table th,.minitab-table td{border:1px solid #d9e2ec;padding:7px 9px;text-align:right;white-space:nowrap}.minitab-table th:first-child,.minitab-table td:first-child{text-align:left}.minitab-table thead th{background:#edf4fc;color:#214a76}.minitab-section{font-weight:bold;background:#f9fbfd;color:#36546f;text-align:left!important}.graph-settings{margin-top:12px;border:1px solid #d9e2ec;border-radius:8px;padding:10px 12px;background:#fbfdff}.graph-settings summary{cursor:pointer;font-weight:bold;color:#36546f}.graph-controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.graph-control label{display:block;font-size:11px;color:#66788a;margin-bottom:4px}.graph-control input[type=text]{width:100%;padding:7px;border:1px solid #d9e2ec;border-radius:6px}.graph-control input[type=color]{width:55px;height:30px;border:1px solid #d9e2ec;border-radius:6px;background:#fff}.graphs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.graph-card{border:1px solid #d9e2ec;border-radius:8px;background:#fff;padding:8px;min-height:360px;display:flex;flex-direction:column}.graph-card-title{font-size:13px;font-weight:bold;color:#36546f;margin:2px 4px 7px}.graph-card svg{width:100%;height:300px;display:block;flex:1;min-height:280px}.graph-note{font-size:11px;color:#7b8997;margin:5px 4px 2px}
+.chart-wrap{margin-top:15px;border:1px solid #d9e2ec;border-radius:8px;background:#fff;padding:10px}.chart-title{font-size:13px;font-weight:bold;color:#36546f;margin:2px 4px 8px}.chart-wrap svg{width:100%;height:270px;display:block}.chart-note{font-size:11px;color:#7b8997;margin:6px 4px 2px}
+.toolbar{padding:10px 14px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}.hint{margin-left:auto;color:#66788a;font-size:12px}
+.sheet{overflow:auto;max-height:560px}table{border-collapse:collapse;width:max-content;min-width:100%}th,td{border:1px solid #d9e2ec;height:34px}.corner,.rowhead{background:#f7f9fc}.col-head.selected-header,.rowhead.selected-header{background:#b9d9f7!important;color:#123d67;font-weight:bold}.corner{cursor:pointer}.col-head,.rowhead{cursor:pointer}.rowhead{position:sticky;left:0;width:55px;text-align:center;color:#607286;z-index:2}.corner{position:sticky;left:0;z-index:3}
+thead th{position:sticky;top:0;background:#edf4fc;z-index:2}.colname{padding:3px}.colname input{width:120px;border:0;background:transparent;text-align:center;font-weight:bold;color:#214a76}.cell{min-width:130px}.cell input{width:100%;height:33px;border:0;padding:6px 9px;outline:none}.cell input:focus{box-shadow:inset 0 0 0 2px #5aa1ed}.cell input.active-nav{background:#f2f8ff}.cell.selected-cell{background:#dcecff!important}.cell.selected-cell input{background:transparent}
+.status{padding:8px 14px;color:#66788a;font-size:12px;border-top:1px solid #d9e2ec}.selection-info{color:#36546f;font-weight:bold}
+footer{text-align:center;color:#7b8997;font-size:12px;padding:15px}
+@media(max-width:1050px){.metrics{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.graphs-grid{grid-template-columns:1fr}}
+@media(max-width:600px){header{flex-direction:column;align-items:flex-start}.fields{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.hint{width:100%;margin-left:0}.sheet{max-height:500px}}
+
+.result-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;margin-top:12px;align-items:stretch}
+.result-grid .minitab-wrap,.result-grid .graphs-grid{margin-top:0;min-width:0;height:100%}.result-grid .minitab-wrap{grid-column:1;grid-row:1}.result-grid .graphs-grid{display:contents}.result-grid .graph-card:nth-child(1){grid-column:2;grid-row:1}.result-grid .graph-card:nth-child(2){grid-column:1;grid-row:2}.result-grid .graph-card:nth-child(3){grid-column:2;grid-row:2}
+@media(max-width:1000px){.result-grid{grid-template-columns:1fr;grid-template-rows:auto}.result-grid .minitab-wrap,.result-grid .graph-card:nth-child(1),.result-grid .graph-card:nth-child(2),.result-grid .graph-card:nth-child(3){grid-column:auto;grid-row:auto}.result-grid .graphs-grid{display:contents}}
+
+/* Strong theme overrides */
+body.theme-blue header{background:linear-gradient(135deg,#0b4f8a,#1684d8)}
+body.theme-light{background:#fff} body.theme-light header{background:#fff;color:#222;border-bottom:1px solid #ddd}
+body.theme-light .panel{box-shadow:none;border-radius:4px} body.theme-light .title{background:#f4f4f4}
+body.theme-light button.primary{background:#333;border-color:#333;color:#fff}
+body.theme-dark{background:#0b1117;color:#e8f1f8} body.theme-dark header{background:linear-gradient(135deg,#02070b,#152a3b)}
+body.theme-dark .panel,body.theme-dark .graph-card{background:#18232d;border-color:#344756;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+body.theme-dark .title,body.theme-dark .minitab-head{background:#1d2b37}
+body.theme-dark button{background:#22313e;color:#e8f1f8;border-color:#425667}
+body.theme-dark input,body.theme-dark select{background:#18232d;color:#eef6fb;border-color:#425667}
+body.theme-minimal{background:#f8f8f8} body.theme-minimal header{background:#303030;color:#fff}
+body.theme-minimal .panel{border-color:#bbb;border-radius:2px;box-shadow:none}
+body.theme-minimal .title{background:#e8e8e8} body.theme-minimal button{border-radius:2px}
+body.theme-pastel{background:#fff2f8;color:#65465f} body.theme-pastel header{background:linear-gradient(135deg,#9c5b88,#e09ac6)}
+body.theme-pastel .panel{border-color:#e8c8df;border-radius:16px;box-shadow:0 8px 22px rgba(180,100,160,.12)}
+body.theme-pastel .title{background:#ffe6f3;border-color:#e8c8df} body.theme-pastel button{border-radius:18px}
+body.theme-pastel .graph-card{border-radius:16px}
+body.theme-digital{background:#02090c;color:#baf7ff} body.theme-digital header{background:#00171e;color:#6ff5ff;border-bottom:1px solid #00d9ff}
+body.theme-digital .panel,body.theme-digital .graph-card{background:#06171d;border-color:#075866;box-shadow:0 0 16px rgba(0,229,255,.08)}
+body.theme-digital .title,body.theme-digital .minitab-head{background:#09252d;color:#6ff5ff}
+body.theme-digital button{background:#071d24;color:#aef6ff;border-color:#087285;border-radius:2px}
+body.theme-digital input,body.theme-digital select{background:#06171d;color:#baf7ff;border-color:#087285}
+
+/* V1.6: result readability in dark/digital themes */
+body.theme-dark .result,body.theme-digital .result{color:var(--text)}
+body.theme-dark .metric,body.theme-digital .metric{background:var(--title-bg);border-color:var(--border)}
+body.theme-dark .metric small,body.theme-digital .metric small{color:var(--muted)}
+body.theme-dark .decision,body.theme-digital .decision{background:#203746;border-left-color:#4db5ff;color:#eef8ff}
+body.theme-dark .detail,body.theme-digital .detail{color:var(--muted)}
+body.theme-dark .result-actions .secondary,body.theme-digital .result-actions .secondary{background:#223b48;color:#e9fbff;border-color:#41606d}
+body.theme-dark .minitab-wrap,body.theme-digital .minitab-wrap{background:var(--panel-bg);border-color:var(--border)}
+body.theme-dark .minitab-head,body.theme-digital .minitab-head{background:#17313c;color:#bff7ff}
+body.theme-dark .minitab-table th,body.theme-dark .minitab-table td,body.theme-digital .minitab-table th,body.theme-digital .minitab-table td{border-color:#3d5867;color:#eaf7fb}
+body.theme-dark .minitab-table thead th,body.theme-digital .minitab-table thead th{background:#213d4a;color:#bff7ff}
+body.theme-dark .minitab-section,body.theme-digital .minitab-section{background:#1a3440;color:#bff7ff}
+body.theme-dark .graph-settings,body.theme-digital .graph-settings{background:var(--title-bg);border-color:var(--border)}
+body.theme-dark .graph-settings summary,body.theme-digital .graph-settings summary{color:#bff7ff}
+body.theme-dark .graph-control label,body.theme-digital .graph-control label{color:var(--muted)}
+body.theme-dark .graph-card-title,body.theme-digital .graph-card-title{color:#bff7ff}
+body.theme-dark .graph-note,body.theme-digital .graph-note{color:#a9c0cb}
+body.theme-dark .title small,body.theme-digital .title small{color:var(--muted)}
+body.theme-dark .toolbar,body.theme-digital .toolbar{background:var(--panel-bg)}
+body.theme-dark .hint,body.theme-digital .hint,body.theme-dark .status,body.theme-digital .status{color:var(--muted)}
+body.theme-dark .col-head,body.theme-digital .col-head,body.theme-dark .rowhead,body.theme-digital .rowhead{background:#213d4a;color:#bff7ff}
+body.theme-dark .colname input,body.theme-digital .colname input{color:#bff7ff}
+body.theme-dark .cell,body.theme-digital .cell{border-color:#3d5867}
+body.theme-dark .cell input,body.theme-digital .cell input{background:#182c36;color:#eef8ff}
+body.theme-dark .cell input.active-nav,body.theme-digital .cell input.active-nav{background:#203d49}
+body.theme-dark .cell.selected-cell,body.theme-digital .cell.selected-cell{background:#28536a!important}
+body.theme-dark .selection-info,body.theme-digital .selection-info{color:#bff7ff}
+
+/* V1.7 Result layout: statistical output full-width on top, three equal graphs below */
+.result-grid{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  grid-template-rows:auto auto !important;
+  gap:14px !important;
+  width:100% !important;
+  margin-top:12px !important;
+}
+.result-grid .minitab-wrap{
+  grid-column:1 !important;
+  grid-row:1 !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:0 !important;
+}
+.result-grid .graphs-grid{
+  grid-column:1 !important;
+  grid-row:2 !important;
+  display:grid !important;
+  grid-template-columns:repeat(3,1fr) !important;
+  gap:14px !important;
+  width:100% !important;
+  height:auto !important;
+}
+.result-grid .graph-card,
+.result-grid .graph-card:nth-child(1),
+.result-grid .graph-card:nth-child(2),
+.result-grid .graph-card:nth-child(3){
+  grid-column:auto !important;
+  grid-row:auto !important;
+  min-height:390px !important;
+  height:390px !important;
+}
+.result-grid .graph-card svg{
+  height:300px !important;
+  min-height:260px !important;
+}
+.result-bottom-controls{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  width:100%;
+  margin-top:12px;
+}
+.result-bottom-controls .result-actions{
+  margin-top:0 !important;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.result-bottom-controls .graph-settings{
+  width:100%;
+  margin-top:0 !important;
+}
+@media(max-width:1000px){
+  .result-grid .graphs-grid{grid-template-columns:1fr !important}
+}
+
+/* Keep result controls below all result visuals */
+.result-bottom-controls{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:100%;
+  margin-top:12px;
+  padding-top:2px;
+}
+.result-bottom-controls .result-actions{
+  margin-top:0 !important;
+}
+.result-bottom-controls .graph-settings{
+  width:100%;
+  margin-top:0 !important;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+<header>
+  <div><h1>Hypothesis Test Analyzer</h1><div class="sub">Engineering statistical analysis with spreadsheet-style data input</div></div>
+  <div><button onclick="demo()">Load Demo</button> <button onclick="resetAll()">Reset</button></div>
+</header>
+<div class="theme-bar">🎨 Theme <select id="themeSelect" onchange="setTheme(this.value)"><option value="blue">Blue</option><option value="light">Light</option><option value="dark">Dark</option><option value="minimal">Minimal</option><option value="pastel">Pastel</option><option value="digital">Digital</option></select></div>
+<main>
+
+<!-- Test Setup + Result at the top -->
+<div class="setup-result">
+<section class="panel">
+  <div class="title">⚙️ Test Setup <small>Select the test and data columns</small></div>
+  <div class="fields">
+    <div class="field"><label>Test Type</label><select id="type" onchange="setup()"><option value="one">One-Sample t-Test</option><option value="two" selected>Two-Sample t-Test (Welch)</option><option value="paired">Paired t-Test</option></select></div>
+    <div class="field"><label>Significance Level (α)</label><select id="alpha"><option>.10</option><option selected>.05</option><option>.01</option></select></div>
+    <div class="field" id="muField"><label>Hypothesized Mean (μ₀)</label><input id="mu" type="number" step="any" value="15"></div>
+    <div class="field"><label>Alternative Hypothesis</label><select id="tail"><option value="two" selected>≠ (two-sided)</option><option value="greater">&gt; (greater)</option><option value="less">&lt; (less)</option></select></div>
+    <div class="field"><label>Sample / Column A</label><select id="a"></select></div>
+    <div class="field" id="bField"><label>Sample / Column B</label><select id="b"></select></div>
+  </div>
+  <div class="run"><button class="primary" onclick="run()">▶ Run Test</button></div>
+</section>
+
+<section class="panel">
+  <div class="title">📊 Result <small>Statistical result and comparison graph</small></div>
+  <div class="result">
+    <div class="metrics">
+      <div class="metric"><small>Sample Size</small><strong id="n">—</strong></div>
+      <div class="metric"><small>Mean / Difference</small><strong id="mean">—</strong></div>
+      <div class="metric"><small>Test Statistic</small><strong id="stat">—</strong></div>
+      <div class="metric"><small>p-value</small><strong id="p">—</strong></div>
+    </div>
+    <div class="decision" id="decision">Enter data and select <b>Run Test</b>.</div>
+    <div id="detail" class="detail">Confidence interval and test details will appear here.</div>
+    
+    <div class="result-grid"><div id="minitabBox" class="minitab-wrap" style="display:none"></div><div id="chartBox" class="graphs-grid" style="display:none"></div></div>
+  </div>
+
+<div class="result-bottom-controls">
+<div class="result-actions">
+      <button class="secondary" onclick="copyResult()">📋 Copy Result</button><button class="secondary" onclick="copyResultImage()">🖼️ Copy Result as Image</button><button class="secondary" onclick="downloadResultImage()">⬇️ PNG</button>
+      <button class="secondary" onclick="window.print()">🖨 Print Result</button>
+    </div>
+
+<div class="graph-settings">
+      <details open><summary>🎨 Graph Settings</summary>
+        <div class="graph-controls">
+          <div class="graph-control"><label>Individual Plot Title</label><input id="titleIndividual" type="text" value="Individual Plot" oninput="updateGraphSettings()"></div>
+          <div class="graph-control"><label>Boxplot Title</label><input id="titleBoxplot" type="text" value="Boxplot" oninput="updateGraphSettings()"></div>
+          <div class="graph-control"><label>Histogram Title</label><input id="titleHistogram" type="text" value="Histogram" oninput="updateGraphSettings()"></div>
+          <div class="graph-control"><label>Sample A Color</label><input id="colorA" type="color" value="#176dbf" oninput="updateGraphSettings()"></div>
+          <div class="graph-control"><label>Sample B Color</label><input id="colorB" type="color" value="#d97706" oninput="updateGraphSettings()"></div>
+          <div class="graph-control"><label>Reference / Mean Color</label><input id="colorRef" type="color" value="#a33" oninput="updateGraphSettings()"></div>
+        </div>
+      </details>
+    </div>
+
+
+</div>
+</section>
+</div>
+
+<!-- Data Worksheet at the bottom -->
+<section class="panel">
+  <div class="title"><span>📋 Data Worksheet</span><small>100 Rows × 10 Columns • Excel-style Copy/Paste • Enter / Arrow navigation</small></div>
+  <div class="toolbar">
+    <button onclick="addRow()">＋ Row</button><button onclick="delRow()">− Row</button><button onclick="addCol()">＋ Col</button><button onclick="delCol()">− Col</button>
+    <button id="undo" onclick="undo()">↶ Undo</button><button id="redo" onclick="redo()">↷ Redo</button><button onclick="clearAll()">Clear All</button><button onclick="csv()">Export CSV</button>
+    <span class="hint">Paste from Excel • Click + drag to select cells • Shift+Click extends selection • Enter ↓ • Tab →</span>
+  </div>
+  <div class="sheet" id="sheet"></div>
+  <div class="status"><span id="status"></span> <span id="selectionInfo" class="selection-info"></span></div>
+</section>
+
+</main>
+<footer>Hypothesis Test Analyzer • V1.7 Prototype</footer>
+
+<script>
+const THEMES=['blue','light','dark','minimal','pastel','digital'];
+function setTheme(name){THEMES.forEach(t=>document.body.classList.remove('theme-'+t));document.body.classList.add('theme-'+name);localStorage.setItem('hypothesisTheme',name);if($('themeSelect'))$('themeSelect').value=name;}
+const DEFAULT_ROWS=100, DEFAULT_COLS=10;
+let R=DEFAULT_ROWS,C=DEFAULT_COLS;
+let D=Array.from({length:R},()=>Array(C).fill(""));
+let H=Array.from({length:C},(_,i)=>columnName(i));
+let hist=[],future=[],lastResult=null,selectionStart=null,selectionEnd=null,isSelecting=false;
+const $=id=>document.getElementById(id);
+const snap=()=>JSON.stringify([D,H]);
+
+function columnName(i){return "Sample "+String.fromCharCode(65+i)}
+function restore(s){[D,H]=JSON.parse(s);R=D.length;C=H.length;render()}
+function save(){hist.push(snap());if(hist.length>50)hist.shift();future=[];buttons()}
+function undo(){if(!hist.length)return;future.push(snap());restore(hist.pop());buttons()}
+function redo(){if(!future.length)return;hist.push(snap());restore(future.pop());buttons()}
+function buttons(){$("undo").disabled=!hist.length;$('redo').disabled=!future.length}
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}
+function focusCell(r,c){
+  r=Math.max(0,Math.min(R-1,r)); c=Math.max(0,Math.min(C-1,c));
+  const el=document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
+  if(el){el.focus();el.select();el.scrollIntoView({block:'nearest',inline:'nearest'});}
+  updateSelection(r,c);
+}
+function updateSelection(r,c){
+  document.querySelectorAll('.cell input').forEach(x=>x.classList.remove('active-nav'));
+  const el=document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
+  if(el)el.classList.add('active-nav');
+  $('selectionInfo').textContent=`Selected: ${H[c] || columnName(c)} / Row ${r+1}`;
+}
+function render(){
+  let x='<table><thead><tr><th class="corner"></th>';
+  H.forEach((h,c)=>x+=`<th class="col-head" data-c="${c}" onclick="selectColumn(${c})"><div class="colname"><input value="${esc(h)}" onchange="rename(${c},this.value)" onclick="event.stopPropagation()"></div></th>`);
+  x+='</tr></thead><tbody>';
+  D.forEach((r,i)=>{x+=`<tr><th class="rowhead" onclick="selectRow(${i})">${i+1}</th>`;r.forEach((v,j)=>x+=`<td class="cell" data-r="${i}" data-c="${j}" onmousedown="startSelection(event,${i},${j})" onmouseenter="extendSelection(${i},${j})" onclick="cellClick(event,${i},${j})"><input value="${esc(v)}" data-r="${i}" data-c="${j}" onchange="edit(this)" onfocus="updateSelection(${i},${j})" onkeydown="navigate(event,this)" onpaste="paste(event,this)"></td>`);x+='</tr>'});
+  x+='</tbody></table>';$('sheet').innerHTML=x;$('status').textContent=`${R} rows × ${C} columns`;
+  populate();buttons();
+}
+
+
+function selectColumn(c){
+  selectionStart={r:0,c}; selectionEnd={r:R-1,c}; paintSelection();
+  document.querySelectorAll('.col-head.selected-header').forEach(x=>x.classList.remove('selected-header'));
+  const h=document.querySelector(`.col-head[data-c="${c}"]`);
+  if(h)h.classList.add('selected-header');
+  $('selectionInfo').textContent=`Selected: ${H[c]} — ${R} rows`;
+}
+function selectRow(r){
+  selectionStart={r,c:0}; selectionEnd={r,c:C-1}; paintSelection();
+  document.querySelectorAll('.rowhead.selected-header').forEach(x=>x.classList.remove('selected-header'));
+  document.querySelectorAll('.rowhead').forEach((el,i)=>{if(i===r)el.classList.add('selected-header')});
+  $('selectionInfo').textContent=`Selected: Row ${r+1} — ${C} columns`;
+}
+
+function normalizeRange(){
+  if(!selectionStart)return null;
+  const end=selectionEnd||selectionStart;
+  return {r1:Math.min(selectionStart.r,end.r),r2:Math.max(selectionStart.r,end.r),
+          c1:Math.min(selectionStart.c,end.c),c2:Math.max(selectionStart.c,end.c)};
+}
+function paintSelection(){
+  document.querySelectorAll('.cell.selected-cell').forEach(x=>x.classList.remove('selected-cell'));document.querySelectorAll('.col-head.selected-header,.rowhead.selected-header').forEach(x=>x.classList.remove('selected-header'));
+  const q=normalizeRange(); if(!q)return;
+  for(let r=q.r1;r<=q.r2;r++)for(let c=q.c1;c<=q.c2;c++){
+    const cell=document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+    if(cell)cell.classList.add('selected-cell');
+  }
+  $('selectionInfo').textContent=`Selected: R${q.r1+1}:R${q.r2+1} × C${q.c1+1}:C${q.c2+1}`;
+}
+function startSelection(e,r,c){
+  if(e.button!==0)return;
+  isSelecting=true;selectionStart={r,c};selectionEnd={r,c};paintSelection();
+  const input=document.querySelector(`input[data-r="${r}"][data-c="${c}"]`);
+  if(input)input.focus();
+}
+function extendSelection(r,c){if(isSelecting){selectionEnd={r,c};paintSelection();}}
+function cellClick(e,r,c){if(e.shiftKey&&selectionStart){selectionEnd={r,c};paintSelection();}}
+document.addEventListener('mouseup',()=>{isSelecting=false;});
+document.addEventListener('copy',e=>{
+  const q=normalizeRange();if(!q)return;
+  const rows=[];
+  for(let r=q.r1;r<=q.r2;r++){
+    const vals=[];for(let c=q.c1;c<=q.c2;c++)vals.push(String(D[r][c]??''));
+    rows.push(vals.join('\t'));
+  }
+  e.clipboardData.setData('text/plain',rows.join('\n'));e.preventDefault();
+});
+
+function commitEdit(e){
+  const r=+e.dataset.r,c=+e.dataset.c,v=e.value;
+  if(String(D[r][c])!==String(v)){save();D[r][c]=v;}
+}
+function edit(e){commitEdit(e)}
+function rename(c,v){save();H[c]=v||columnName(c);render()}
+
+function navigate(e,el){
+  const r=+el.dataset.r,c=+el.dataset.c;
+  let nr=r,nc=c,move=false;
+  if(e.key==='Enter'){e.preventDefault();commitEdit(el);nr=r+(e.shiftKey?-1:1);move=true}
+  else if(e.key==='Tab'){e.preventDefault();commitEdit(el);nc=c+(e.shiftKey?-1:1);if(nc<0){nc=C-1;nr=r-1}else if(nc>=C){nc=0;nr=r+1}move=true}
+  else if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
+    e.preventDefault();commitEdit(el);if(e.key==='ArrowUp')nr--;if(e.key==='ArrowDown')nr++;if(e.key==='ArrowLeft')nc--;if(e.key==='ArrowRight')nc++;move=true;
+  }
+  if(move){
+    if(nr<0)nr=0;if(nr>=R)nr=R-1;if(nc<0)nc=0;if(nc>=C)nc=C-1;
+    focusCell(nr,nc);
+  }
+}
+
+function paste(e,el){
+  const cb=e.clipboardData||window.clipboardData;
+  if(!cb)return;
+  let text=cb.getData('text/plain')||cb.getData('text');
+  if(!text)return;
+  e.preventDefault();
+  text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  if(text.endsWith('\n'))text=text.slice(0,-1);
+  const matrix=text.split('\n').map(row=>row.split('\t'));
+  const r0=+el.dataset.r,c0=+el.dataset.c;
+  save();
+  while(D.length<r0+matrix.length){D.push(Array(C).fill(''));R++}
+  const maxCols=Math.max(...matrix.map(row=>row.length),1);
+  while(C<c0+maxCols){C++;H.push(columnName(C-1));D.forEach(row=>row.push(''))}
+  matrix.forEach((row,ri)=>row.forEach((value,ci)=>D[r0+ri][c0+ci]=value));
+  render();
+  focusCell(r0,c0);
+}
+
+function addRow(){save();D.push(Array(C).fill(''));R++;render()}
+function delRow(){if(R<=1)return;save();D.pop();R--;render()}
+function addCol(){save();C++;H.push(columnName(C-1));D.forEach(r=>r.push(''));render()}
+function delCol(){if(C<=1)return;save();H.pop();C--;D.forEach(r=>r.pop());render()}
+function clearAll(){save();D=Array.from({length:R},()=>Array(C).fill(''));render();clearResult()}
+function resetAll(){R=DEFAULT_ROWS;C=DEFAULT_COLS;D=Array.from({length:R},()=>Array(C).fill(''));H=Array.from({length:C},(_,i)=>columnName(i));hist=[];future=[];lastResult=null;render();clearResult();setup();$('titleIndividual').value='Individual Plot';$('titleBoxplot').value='Boxplot';$('titleHistogram').value='Histogram';$('colorA').value='#176dbf';$('colorB').value='#d97706';$('colorRef').value='#a33'}
+function populate(){
+  ['a','b'].forEach(id=>$(id).innerHTML=H.map((h,i)=>`<option value="${i}">${esc(h)}</option>`).join(''));
+  if(C>1)$('b').selectedIndex=1;
+}
+function setup(){
+  const type=$('type').value;
+  $('muField').style.display=type==='one'?'block':'none';
+  $('bField').style.display=type==='one'?'none':'block';
+  if(type==='paired')$('tail').value='two';
+}
+function nums(c){return D.map(r=>parseFloat(r[c])).filter(Number.isFinite)}
+function avg(x){return x.reduce((a,b)=>a+b,0)/x.length}
+function variance(x){let m=avg(x);return x.reduce((s,v)=>s+(v-m)**2,0)/(x.length-1)}
+function f(x){return Number.isFinite(x)?x.toFixed(4):'—'}
+function lg(z){let q=[76.18009172947146,-86.50532057277577,24.01409824083091,-1.231739572450155,.001208650973866179,-.000005395239384953],x=z,y=x,t=x+5.5;t-=(x+.5)*Math.log(t);let s=1.000000000190015;for(let i=0;i<q.length;i++){y++;s+=q[i]/y}return -t+Math.log(2.5066282746310005*s/x)}
+function bc(a,b,x){let M=200,E=3e-12,F=1e-30,q=a+b,qa=a+1,ma=a-1,c=1,d=1-q*x/qa;if(Math.abs(d)<F)d=F;d=1/d;let h=d;for(let m=1;m<=M;m++){let m2=2*m,A=m*(b-m)*x/((ma+m2)*(a+m2));d=1+A*d;if(Math.abs(d)<F)d=F;c=1+A/c;if(Math.abs(c)<F)c=F;d=1/d;h*=d*c;A=-(a+m)*(q+m)*x/((a+m2)*(qa+m2));d=1+A*d;if(Math.abs(d)<F)d=F;c=1+A/c;if(Math.abs(c)<F)c=F;d=1/d;let del=d*c;h*=del;if(Math.abs(del-1)<E)break}return h}
+function ib(x,a,b){if(x<=0)return 0;if(x>=1)return 1;let bt=Math.exp(lg(a+b)-lg(a)-lg(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*bc(a,b,x)/a:1-bt*bc(b,a,1-x)/b}
+function tcdf(t,df){if(!isFinite(t))return t<0?0:1;let z=df/(df+t*t),v=ib(z,df/2,.5);return t>=0?1-.5*v:.5*v}
+function tp(t,df,tail){return tail==='greater'?1-tcdf(t,df):tail==='less'?tcdf(t,df):2*Math.min(tcdf(t,df),1-tcdf(t,df))}
+function tcrit(alpha,df){let lo=0,hi=20,target=1-alpha/2;for(let i=0;i<70;i++){let m=(lo+hi)/2;if(tcdf(m,df)<target)lo=m;else hi=m}return(hi+lo)/2}
+
+function run(){
+  let type=$('type').value,A=nums(+$('a').value),alpha=+$('alpha').value,tail=$('tail').value;
+  if(A.length<2){alert('Enter at least 2 numeric values in Sample A.');return}
+  let n=A.length,m=avg(A),stat,df,low,high,p,labels={a:H[+$('a').value],b:H[+$('b').value]};
+  if(type==='one'){
+    let s=Math.sqrt(variance(A)),se=s/Math.sqrt(n),mu=+$('mu').value;stat=(m-mu)/se;df=n-1;p=tp(stat,df,tail);let t=tcrit(alpha,df);low=m-t*se;high=m+t*se;
+  }else if(type==='two'){
+    let B=nums(+$('b').value);if(B.length<2){alert('Enter at least 2 numeric values in Sample B.');return}
+    let ma=avg(A),mb=avg(B),va=variance(A),vb=variance(B),se=Math.sqrt(va/A.length+vb/B.length);
+    stat=(ma-mb)/se;df=(va/A.length+vb/B.length)**2/(va*va/(A.length*A.length*(A.length-1))+vb*vb/(B.length*B.length*(B.length-1)));p=tp(stat,df,tail);let t=tcrit(alpha,df);m=ma-mb;n=`${A.length} / ${B.length}`;low=m-t*se;high=m+t*se;labels.meanA=ma;labels.meanB=mb;labels.dataA=A;labels.dataB=B;
+  }else{
+    let B=nums(+$('b').value),k=Math.min(A.length,B.length);if(k<2){alert('Enter at least 2 paired values in both columns.');return}
+    let z=[];for(let i=0;i<k;i++)z.push(A[i]-B[i]);n=k;m=avg(z);let se=Math.sqrt(variance(z)/k);stat=m/se;df=k-1;p=tp(stat,df,'two');let t=tcrit(alpha,df);low=m-t*se;high=m+t*se;labels.meanA=avg(A.slice(0,k));labels.meanB=avg(B.slice(0,k));labels.dataA=A.slice(0,k);labels.dataB=B.slice(0,k);
+  }
+  $('n').textContent=n;$('mean').textContent=f(m);$('stat').textContent=f(stat);$('p').textContent=p.toFixed(6);
+  let reject=p<alpha;
+  $('decision').innerHTML=`<b>${reject?'Reject H₀':'Do not reject H₀'}</b> — p-value ${p.toFixed(6)} ${reject?'<':'≥'} α ${alpha}.`;
+  $('detail').innerHTML=`Degrees of freedom: ${Number(df).toFixed(2)}<br>${(1-alpha)*100}% CI: [ ${f(low)} , ${f(high)} ]`;
+  lastResult={type,p,alpha,labels,A,df,mean:m,stat};setDefaultGraphTitles();drawChart(lastResult);
+}
+function clearResult(){$('n').textContent=$('mean').textContent=$('stat').textContent=$('p').textContent='—';$('decision').innerHTML='Enter data and select <b>Run Test</b>.';$('detail').textContent='Confidence interval and test details will appear here.';$('chartBox').style.display='none';$('chartBox').innerHTML='';$('minitabBox').style.display='none';$('minitabBox').innerHTML='';lastResult=null}
+
+function svgEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function setDefaultGraphTitles(){
+  const type=$('type').value;
+  const aName=H[+$('a').value]||'Sample A';
+  const bName=H[+$('b').value]||'Sample B';
+  let testName=type==='two'?'Two-Sample t-Test':type==='paired'?'Paired t-Test':'One-Sample t-Test';
+  const vs=type==='one'?`${aName}.`:`${aName} vs. ${bName}.`;
+  $('titleBoxplot').value=`Boxplot of ${testName} ${vs}`;
+  $('titleHistogram').value=`Histogram of ${testName} ${vs}`;
+  $('titleIndividual').value=`Individual Plot of ${testName} ${vs}`;
+}
+function graphSettings(){return {
+  ti:$('titleIndividual').value||'Individual Plot',
+  tb:$('titleBoxplot').value||'Boxplot',
+  th:$('titleHistogram').value||'Histogram',
+  ca:$('colorA').value,cb:$('colorB').value,cr:$('colorRef').value
+}}
+function updateGraphSettings(){if(lastResult){drawGraphs(lastResult);}}
+function drawGraphs(res){
+  const box=$('chartBox');box.style.display='grid';const g=graphSettings();
+  let A=res.A,B=(res.labels&&res.labels.dataB)||[];if(res.type==='one')B=[];
+  box.innerHTML=makeBoxplot(A,B,res,g)+makeHistogram(A,B,res,g)+makeIndividual(A,B,res,g);
+}
+function escText(s){return svgEsc(s)}
+function chartRange(A,B){let all=A.concat(B).filter(Number.isFinite);let min=Math.min(...all),max=Math.max(...all);if(min===max){min-=1;max+=1}let pad=(max-min)*.12;return [min-pad,max+pad]}
+function makeIndividual(A,B,res,g){
+  const [min,max]=chartRange(A,B),W=900,Hh=280,L=65,Rr=25,T=30,Btm=225,ys=v=>Btm-(v-min)/(max-min)*(Btm-T);
+  let svg=`<div class="graph-card"><div class="graph-card-title">${escText(g.ti)}</div><svg viewBox="0 0 ${W} ${Hh}"><line x1="${L}" y1="${Btm}" x2="${W-Rr}" y2="${Btm}" stroke="#8aa0b5"/>`;
+  for(let i=0;i<6;i++){let v=min+(max-min)*i/5,y=ys(v);svg+=`<line x1="${L}" y1="${y}" x2="${W-Rr}" y2="${y}" stroke="#e5ebf0"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#66788a">${v.toFixed(2)}</text>`}
+  if(res.type==='one'){let mu=+$('mu').value,y=ys(mu);svg+=`<line x1="${L}" y1="${y}" x2="${W-Rr}" y2="${y}" stroke="${g.cr}" stroke-width="3" stroke-dasharray="7 5"/><text x="${W-Rr-5}" y="${y-6}" text-anchor="end" font-size="11" fill="${g.cr}">μ₀ = ${f(mu)}</text>`}
+  const plot=(data,x0,x1,color,label)=>{data.forEach((v,i)=>{let x=x0+(x1-x0)*(data.length===1?.5:i/(data.length-1));let y=ys(v)+(i%5-2)*2;svg+=`<circle cx="${x}" cy="${y}" r="5" fill="${color}"><title>${escText(label)}: ${f(v)}</title></circle>`})};
+  if(B.length){plot(A,L+45,(W/2)-35,g.ca,H[+$('a').value]);plot(B,(W/2)+35,W-Rr-45,g.cb,H[+$('b').value]);svg+=`<text x="${W*.25}" y="258" text-anchor="middle" font-size="12" font-weight="bold" fill="${g.ca}">${escText(H[+$('a').value])}</text><text x="${W*.75}" y="258" text-anchor="middle" font-size="12" font-weight="bold" fill="${g.cb}">${escText(H[+$('b').value])}</text>`}
+  else {plot(A,L+20,W-Rr-20,g.ca,H[+$('a').value])}
+  svg+=`</svg><div class="graph-note">Individual observations. Each point represents one measurement.</div></div>`;return svg;
+}
+function quartiles(x){let a=[...x].sort((a,b)=>a-b),n=a.length;const med=k=>k.length%2?k[(k.length-1)/2]:(k[k.length/2-1]+k[k.length/2])/2;let m=med(a),lo=a.slice(0,Math.floor(n/2)),hi=a.slice(Math.ceil(n/2));return {min:a[0],q1:med(lo),med:m,q3:med(hi),max:a[n-1],mean:avg(a)}}
+function makeBoxplot(A,B,res,g){
+  const sets=B.length?[{name:H[+$('a').value],data:A,color:g.ca,x:230},{name:H[+$('b').value],data:B,color:g.cb,x:670}]:[{name:H[+$('a').value],data:A,color:g.ca,x:450}];
+  const [min,max]=chartRange(A,B),W=900,Hh=280,L=65,Rr=25,T=30,Btm=225,ys=v=>Btm-(v-min)/(max-min)*(Btm-T);let svg=`<div class="graph-card"><div class="graph-card-title">${escText(g.tb)}</div><svg viewBox="0 0 ${W} ${Hh}">`;
+  for(let i=0;i<6;i++){let v=min+(max-min)*i/5,y=ys(v);svg+=`<line x1="${L}" y1="${y}" x2="${W-Rr}" y2="${y}" stroke="#e5ebf0"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#66788a">${v.toFixed(2)}</text>`}
+  sets.forEach(s=>{let q=quartiles(s.data),x=s.x,w=95;svg+=`<line x1="${x}" y1="${ys(q.max)}" x2="${x}" y2="${ys(q.q3)}" stroke="${s.color}" stroke-width="2"/><line x1="${x}" y1="${ys(q.q1)}" x2="${x}" y2="${ys(q.min)}" stroke="${s.color}" stroke-width="2"/><line x1="${x-w/2}" y1="${ys(q.max)}" x2="${x+w/2}" y2="${ys(q.max)}" stroke="${s.color}" stroke-width="2"/><line x1="${x-w/2}" y1="${ys(q.min)}" x2="${x+w/2}" y2="${ys(q.min)}" stroke="${s.color}" stroke-width="2"/><rect x="${x-w/2}" y="${ys(q.q3)}" width="${w}" height="${Math.max(1,ys(q.q1)-ys(q.q3))}" fill="${s.color}" fill-opacity=".18" stroke="${s.color}" stroke-width="2"/><line x1="${x-w/2}" y1="${ys(q.med)}" x2="${x+w/2}" y2="${ys(q.med)}" stroke="${s.color}" stroke-width="3"/><circle cx="${x}" cy="${ys(q.mean)}" r="4" fill="${g.cr}"/><text x="${x}" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="${s.color}">${escText(s.name)}</text>`});
+  svg+=`</svg><div class="graph-note">Box = Q1 to Q3; center line = median; whiskers = minimum/maximum; dot = mean.</div></div>`;return svg;
+}
+function makeHistogram(A,B,res,g){
+  const sets=B.length?[{name:H[+$('a').value],data:A,color:g.ca},{name:H[+$('b').value],data:B,color:g.cb}]:[{name:H[+$('a').value],data:A,color:g.ca}];
+  const all=A.concat(B),[min,max]=chartRange(all,[]),W=900,Hh=280,L=65,Rr=25,T=30,Btm=225,bins=8,step=(max-min)/bins,xs=v=>L+(v-min)/(max-min)*(W-L-Rr),yMax=Math.max(...sets.flatMap(s=>{let c=Array(bins).fill(0);s.data.forEach(v=>{let k=Math.min(bins-1,Math.max(0,Math.floor((v-min)/step)));c[k]++});return c}),1);let svg=`<div class="graph-card"><div class="graph-card-title">${escText(g.th)}</div><svg viewBox="0 0 ${W} ${Hh}">`;
+  for(let i=0;i<5;i++){let v=yMax*i/4,y=Btm-i/4*(Btm-T);svg+=`<line x1="${L}" y1="${y}" x2="${W-Rr}" y2="${y}" stroke="#e5ebf0"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#66788a">${Math.round(v)}</text>`}
+  sets.forEach((s,si)=>{let counts=Array(bins).fill(0);s.data.forEach(v=>{let k=Math.min(bins-1,Math.max(0,Math.floor((v-min)/step)));counts[k]++});counts.forEach((c,i)=>{if(!c)return;let x=L+i*(W-L-Rr)/bins+2+si*7,w=(W-L-Rr)/bins-4,h=c/yMax*(Btm-T);svg+=`<rect x="${x}" y="${Btm-h}" width="${Math.max(3,w/(B.length?2:1))}" height="${h}" fill="${s.color}" fill-opacity=".55" stroke="${s.color}"><title>${escText(s.name)}: ${c}</title></rect>`})});
+  for(let i=0;i<=4;i++){let v=min+(max-min)*i/4,x=xs(v);svg+=`<text x="${x}" y="244" text-anchor="middle" font-size="11" fill="#66788a">${v.toFixed(1)}</text>`}
+  svg+=`</svg><div class="graph-note">Histogram bins are calculated from the displayed sample values.</div></div>`;return svg;
+}
+function drawChart(res){drawGraphs(res);renderMinitab(res);}
+function renderMinitab(res){
+  const box=$('minitabBox');box.style.display='block';const type=res.type, A=res.A,B=res.labels.dataB||[], alpha=res.alpha;
+  const fmt=v=>Number.isFinite(v)?v.toFixed(4):'—';
+  let html=`<div class="minitab-head">Hypothesis Statistical Output</div><table class="minitab-table"><thead><tr><th>Sample</th><th>N</th><th>Mean</th><th>StDev</th><th>SE Mean</th></tr></thead><tbody>`;
+  const row=(name,x)=>{let sd=Math.sqrt(variance(x));return `<tr><td>${svgEsc(name)}</td><td>${x.length}</td><td>${fmt(avg(x))}</td><td>${fmt(sd)}</td><td>${fmt(sd/Math.sqrt(x.length))}</td></tr>`};
+  html+=row(H[+$('a').value],A);if(B.length)html+=row(H[+$('b').value],B);html+=`</tbody></table>`;
+  if(type==='two'){let diff=avg(A)-avg(B),va=variance(A),vb=variance(B),se=Math.sqrt(va/A.length+vb/B.length),t=res.stat,df=res.df,crit=tcrit(alpha,df),ciLow=diff-crit*se,ciHigh=diff+crit*se;html+=`<table class="minitab-table" style="margin-top:12px"><tbody><tr><th class="minitab-section" colspan="6">Two-Sample t-Test (Welch)</th></tr><tr><td>Difference (A − B)</td><td>Estimate</td><td>${fmt(diff)}</td><td>SE Difference</td><td>${fmt(se)}</td><td></td></tr><tr><td>Test Statistic</td><td>T-Value</td><td>${fmt(t)}</td><td>DF</td><td>${fmt(df)}</td><td>P-Value ${res.p.toFixed(6)}</td></tr><tr><td>Confidence Interval</td><td colspan="5">${(1-alpha)*100}% CI: [ ${fmt(ciLow)} , ${fmt(ciHigh)} ]</td></tr></tbody></table>`}
+  else if(type==='one'){let mu=+$('mu').value;html+=`<table class="minitab-table" style="margin-top:12px"><tbody><tr><th class="minitab-section" colspan="6">One-Sample t-Test</th></tr><tr><td>Test of μ = ${fmt(mu)}</td><td>T-Value</td><td>${fmt(res.stat)}</td><td>DF</td><td>${fmt(res.df)}</td><td>P-Value ${res.p.toFixed(6)}</td></tr></tbody></table>`}
+  else {let diff=avg(A)-avg(B);html+=`<table class="minitab-table" style="margin-top:12px"><tbody><tr><th class="minitab-section" colspan="6">Paired t-Test</th></tr><tr><td>Mean Difference</td><td>Estimate</td><td>${fmt(diff)}</td><td>T-Value</td><td>${fmt(res.stat)}</td><td>P-Value ${res.p.toFixed(6)}</td></tr><tr><td>DF</td><td>${fmt(res.df)}</td><td colspan="4">Paired observations: ${Math.min(A.length,B.length)}</td></tr></tbody></table>`}
+  box.innerHTML=html;
+}
+
+async function buildResultCanvas(){
+  if(!lastResult)throw new Error('Please Run Test first.');
+  if(typeof html2canvas!=='function')throw new Error('Image engine is not loaded.');
+  const source=document.querySelector('.result');
+  const clone=source.cloneNode(true);
+  clone.style.cssText='width:1120px;padding:18px;background:#fff;color:#183153;font-family:Arial,sans-serif;box-sizing:border-box;';
+  const actions=clone.querySelector('.result-actions'); if(actions)actions.remove();
+  const settings=clone.querySelector('.graph-settings'); if(settings)settings.remove();
+  const grid=clone.querySelector('.result-grid');
+  if(grid){grid.style.marginTop='14px';grid.style.display='grid';grid.style.gridTemplateColumns='1fr 1fr';grid.style.gridTemplateRows='1fr 1fr';grid.style.gap='14px';}
+  clone.querySelectorAll('.graph-card').forEach(card=>{card.style.minHeight='330px';card.style.height='330px';});
+  clone.style.position='fixed';clone.style.left='-20000px';clone.style.top='0';clone.style.zIndex='-1';
+  document.body.appendChild(clone);
+  try{
+    return await html2canvas(clone,{backgroundColor:'#ffffff',scale:2,useCORS:true,logging:false,width:1120,windowWidth:1120});
+  }finally{clone.remove();}
+}
+async function copyResultImage(){
+  try{
+    const canvas=await buildResultCanvas();
+    const png=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG conversion failed')),'image/png'));
+    if(!navigator.clipboard||!window.ClipboardItem)throw new Error('Image clipboard is not supported by this browser.');
+    await navigator.clipboard.write([new ClipboardItem({'image/png':png})]);
+    showCopyImageStatus('✅ Result image copied — press Ctrl+V in PowerPoint.');
+  }catch(err){
+    showCopyImageStatus('⚠️ Image clipboard is blocked. Use the new ⬇️ PNG button, then insert the PNG into PowerPoint.');
+  }
+}
+async function downloadResultImage(){
+  try{
+    const canvas=await buildResultCanvas();
+    const png=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG conversion failed')),'image/png'));
+    const url=URL.createObjectURL(png);const a=document.createElement('a');a.href=url;a.download='Hypothesis-Test-Result.png';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    showCopyImageStatus('✅ PNG downloaded — insert it into PowerPoint as an image.');
+  }catch(err){showCopyImageStatus('⚠️ Could not create PNG. Please Run Test again.');}
+}
+function showCopyImageStatus(msg){
+  let note=document.getElementById('copyImageNote');
+  if(!note){note=document.createElement('div');note.id='copyImageNote';note.className='copy-image-note';document.querySelector('.result-actions').appendChild(note)}
+  note.textContent=msg;clearTimeout(window.copyImageTimer);window.copyImageTimer=setTimeout(()=>note.textContent='',3500);
+}
+
+async function copyResult(){
+  if(!lastResult){alert('Please Run Test first.');return}
+  const root=document.createElement('div');root.style.fontFamily='Arial,sans-serif';root.style.color='#183153';root.innerHTML=`<h2>Hypothesis Test Analyzer — Result</h2>${$('minitabBox').outerHTML}${$('chartBox').outerHTML}`;
+  const html=root.innerHTML.replace(/style="display: grid;"/g,'').replace(/style="display: block;"/g,'');
+  const text=root.innerText;
+  try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})})]);}
+  catch(e){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+  const btn=document.querySelector('.result-actions button');if(btn){let old=btn.textContent;btn.textContent='✅ Copied Result';btn.classList.add('copy-ok');setTimeout(()=>{btn.textContent=old;btn.classList.remove('copy-ok')},1800)}
+}
+function demo(){
+  save();R=100;C=10;H=Array.from({length:C},(_,i)=>columnName(i));D=Array.from({length:R},()=>Array(C).fill(''));
+  const A=[9.2,9.4,9.5,9.6,9.7,9.8,9.8,9.9,9.9,9.9,9.95,9.95,10.0,10.0,10.0,10.0,10.0,10.05,10.05,10.05,10.1,10.1,10.1,10.2,10.2,10.2,10.3,10.3,10.4,10.5,10.6,10.8]; const B=[9.017,9.117,9.217,9.317,9.417,9.417,9.517,9.617,9.617,9.667,9.717,9.717,9.767,9.767,9.817,9.817,9.817,9.867,9.867,9.917,9.917,9.967,10.017,10.017,10.067,10.117,10.217,10.317,10.317,10.417,10.517,10.617];
+  A.forEach((v,i)=>D[i][0]=String(v));B.forEach((v,i)=>D[i][1]=String(v));
+  $('type').value='two';$('alpha').value='.05';$('tail').value='two';setup();render();$('a').value='0';$('b').value='1';run();focusCell(0,0);
+}
+function csv(){let rows=[['Row',...H],...D.map((r,i)=>[i+1,...r])],s=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='hypothesis-test-data.csv';a.click()}
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}});
+render();setup();setTheme(localStorage.getItem('hypothesisTheme')||'blue');
+</script>
+</body>
+</html>
